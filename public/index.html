@@ -125,6 +125,63 @@
     input.invalid { border-color: #ef4444; }
     textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 
+    /* ── EQUIPMENT LIST ── */
+    .equip-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .equip-input-row input { flex: 1; }
+    .btn-add {
+      padding: 10px 16px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .btn-add:hover { background: var(--primary-dark); }
+    .equip-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .equip-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      border-radius: 7px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+    .equip-list li button {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+    .equip-list li button:hover { color: #ef4444; background: #fef2f2; }
+    .equip-empty {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 8px;
+    }
+
     /* ── PREVIEW ── */
     .preview-box {
       background: #f0fdf4;
@@ -339,15 +396,14 @@
 
     <div class="card">
       <div class="card-title">🎒 פרטי הציוד</div>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>תיאור הציוד <span class="req">*</span></label>
-          <input id="equipmentDesc" type="text" placeholder="לדוגמה: אפוד זוהר × 2, ערכת עזרה ראשונה × 1" />
+      <div class="form-group">
+        <label>הוסף פריט ציוד <span class="req">*</span></label>
+        <div class="equip-input-row">
+          <input id="equipItemInput" type="text" placeholder="לדוגמה: אפוד זוהר × 2" />
+          <button class="btn-add" onclick="addEquipItem()">+ הוסף</button>
         </div>
-        <div class="form-group">
-          <label>מספר הזמנה <span style="color:#94a3b8;font-weight:400;">(אופציונלי)</span></label>
-          <input id="orderNumber" type="text" placeholder="HZ-1234" />
-        </div>
+        <ul id="equipList" class="equip-list"></ul>
+        <p class="equip-empty" id="equipEmpty">עדיין לא נוספו פריטים...</p>
       </div>
     </div>
 
@@ -397,7 +453,6 @@
                 <th>מתנדב</th>
                 <th>טלפון</th>
                 <th>ציוד</th>
-                <th>הזמנה</th>
                 <th>תאריך</th>
                 <th>סטטוס</th>
                 <th></th>
@@ -441,15 +496,17 @@
 
 הציוד שהזמנת הגיע ומחכה לך 📦
 
-🎒 ציוד: [תיאור ציוד]
-📋 מספר הזמנה: [מספר] ← מוצג רק אם הוזן
+🎒 הציוד שלך:
+• [פריט 1]
+• [פריט 2]
+• ...
 
 לתיאום איסוף פנה אל:
 👤 [שם האחראי]
 📞 [טלפון האחראי]
 🏢 [שם הסניף] ← מוצג רק אם הוזן
 
-המסייעים בדרכים 🚗</div>
+אחראי ציוד סניף [שם הסניף]</div>
       <div class="hint-box">
         💡 התבנית מולאת אוטומטית בכל שליחה. פרטים שלא הוזנו לא יופיעו בהודעה.
       </div>
@@ -462,6 +519,41 @@
   // ── STATE ──
   let coordSettings = JSON.parse(localStorage.getItem('coord_settings') || '{}');
   let history = JSON.parse(localStorage.getItem('send_history') || '[]');
+  let equipItems = [];
+
+  // ── EQUIPMENT LIST ──
+  function addEquipItem() {
+    const input = document.getElementById('equipItemInput');
+    const val = input.value.trim();
+    if (!val) { input.classList.add('invalid'); return; }
+    input.classList.remove('invalid');
+    equipItems.push(val);
+    input.value = '';
+    input.focus();
+    renderEquipList();
+    updatePreview();
+  }
+
+  function removeEquipItem(i) {
+    equipItems.splice(i, 1);
+    renderEquipList();
+    updatePreview();
+  }
+
+  function renderEquipList() {
+    const ul = document.getElementById('equipList');
+    const empty = document.getElementById('equipEmpty');
+    empty.style.display = equipItems.length === 0 ? 'block' : 'none';
+    ul.innerHTML = equipItems.map((item, i) => `
+      <li>
+        <span>• ${esc(item)}</span>
+        <button onclick="removeEquipItem(${i})" title="הסר">×</button>
+      </li>`).join('');
+  }
+
+  document.getElementById('equipItemInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addEquipItem(); }
+  });
 
   // ── TABS ──
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -478,22 +570,21 @@
 
   // ── BUILD MESSAGE ──
   function buildMessage() {
-    const name     = document.getElementById('volunteerName').value.trim();
-    const equip    = document.getElementById('equipmentDesc').value.trim();
-    const order    = document.getElementById('orderNumber').value.trim();
-    const cName    = document.getElementById('s_name').value.trim() || coordSettings.name || '';
-    const cPhone   = document.getElementById('s_phone').value.trim() || coordSettings.phone || '';
-    const cBranch  = document.getElementById('s_branch').value.trim() || coordSettings.branch || '';
+    const name    = document.getElementById('volunteerName').value.trim();
+    const cName   = document.getElementById('s_name').value.trim() || coordSettings.name || '';
+    const cPhone  = document.getElementById('s_phone').value.trim() || coordSettings.phone || '';
+    const cBranch = document.getElementById('s_branch').value.trim() || coordSettings.branch || '';
 
-    if (!name || !equip) return null;
+    if (!name || equipItems.length === 0) return null;
 
-    let msg = `שלום ${name}! 👋\n\nהציוד שהזמנת הגיע ומחכה לך 📦\n\n🎒 ציוד: ${equip}`;
-    if (order) msg += `\n📋 מספר הזמנה: ${order}`;
+    const equipLines = equipItems.map(i => `• ${i}`).join('\n');
+    let msg = `שלום ${name}! 👋\n\nהציוד שהזמנת הגיע ומחכה לך 📦\n\n🎒 הציוד שלך:\n${equipLines}`;
     msg += `\n\nלתיאום איסוף פנה אל:`;
     if (cName)   msg += `\n👤 ${cName}`;
     if (cPhone)  msg += `\n📞 ${cPhone}`;
     if (cBranch) msg += `\n🏢 ${cBranch}`;
-    msg += `\n\nהמסייעים בדרכים 🚗`;
+    const signature = cBranch ? `אחראי ציוד סניף ${cBranch}` : 'אחראי ציוד';
+    msg += `\n\n${signature}`;
     return msg;
   }
 
@@ -512,7 +603,7 @@
     }
   }
 
-  ['volunteerName','equipmentDesc','orderNumber','s_name','s_phone','s_branch'].forEach(id => {
+  ['volunteerName','s_name','s_phone','s_branch'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updatePreview);
   });
 
@@ -531,11 +622,15 @@
 
     // Validate
     let valid = true;
-    ['volunteerName','volunteerPhone','equipmentDesc'].forEach(id => {
+    ['volunteerName','volunteerPhone'].forEach(id => {
       const el = document.getElementById(id);
       if (!el.value.trim()) { el.classList.add('invalid'); valid = false; }
       else el.classList.remove('invalid');
     });
+    if (equipItems.length === 0) {
+      document.getElementById('equipItemInput').classList.add('invalid');
+      valid = false;
+    }
     if (!valid) return false;
 
     if (document.getElementById('saveCoord').checked) saveSettingsFromForm();
@@ -548,10 +643,14 @@
     addToHistory({
       volunteerName: document.getElementById('volunteerName').value.trim(),
       volunteerPhone: phone,
-      equipmentDesc: document.getElementById('equipmentDesc').value.trim(),
-      orderNumber: document.getElementById('orderNumber').value.trim(),
+      equipmentDesc: equipItems.join(', '),
       sentAt: new Date().toISOString(),
     });
+
+    // Clear equipment list
+    equipItems = [];
+    renderEquipList();
+    updatePreview();
 
     return false;
   }
@@ -591,7 +690,6 @@
           <td><strong>${esc(r.volunteerName)}</strong></td>
           <td style="color:var(--text-muted);">${esc(r.volunteerPhone)}</td>
           <td>${esc(r.equipmentDesc)}</td>
-          <td style="color:var(--text-muted);">${r.orderNumber ? esc(r.orderNumber) : '—'}</td>
           <td style="color:var(--text-muted);white-space:nowrap;font-size:13px;">${date}</td>
           <td><span class="badge">נשלח</span></td>
           <td><button class="btn-danger" onclick="deleteEntry(${i})" title="מחק">×</button></td>
