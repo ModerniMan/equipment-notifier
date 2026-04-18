@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>שליחת הודעות ציוד — המסייעים בדרכים</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a56db;
+      --primary-dark: #1e429f;
+      --primary-light: #eff6ff;
+      --primary-border: #bfdbfe;
+      --wa: #25d366;
+      --wa-dark: #128c7e;
+      --success: #059669;
+      --success-light: #ecfdf5;
+      --success-border: #a7f3d0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      padding: 20px 24px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    header .icon { font-size: 28px; }
+    header h1 { font-size: 20px; font-weight: 700; }
+    header p { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 6px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      direction: rtl;
+      font-family: inherit;
+    }
+    .tab-btn.active { background: var(--primary); color: white; }
+    .tab-btn:hover:not(.active) { background: var(--bg); }
+
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── FORM ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    label .req { color: #ef4444; margin-right: 2px; }
+    input, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      direction: rtl;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+    }
+    input.invalid { border-color: #ef4444; }
+    textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+    /* ── PREVIEW ── */
+    .preview-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 16px 18px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 60px;
+      direction: rtl;
+    }
+    .preview-placeholder { color: var(--text-muted); font-style: italic; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      text-decoration: none;
+    }
+    .btn-wa {
+      background: var(--wa);
+      color: white;
+      width: 100%;
+      margin-top: 4px;
+      font-size: 16px;
+      padding: 14px;
+    }
+    .btn-wa:hover { background: var(--wa-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,211,102,0.35); }
+    .btn-wa:active { transform: none; }
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 13px;
+      padding: 8px 16px;
+    }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-copy {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .btn-copy:hover { background: var(--primary-border); }
+    .btn-danger {
+      background: transparent;
+      color: #ef4444;
+      border: none;
+      font-size: 18px;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+      line-height: 1;
+    }
+    .btn-danger:hover { background: #fef2f2; }
+
+    /* ── SAVE CHECKBOX ── */
+    .save-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      cursor: pointer;
+    }
+    .save-row input[type=checkbox] { width: auto; accent-color: var(--primary); cursor: pointer; }
+    .save-row span { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+    /* ── HISTORY ── */
+    .history-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .count-badge {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      font-weight: 600;
+    }
+    .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { background: var(--bg); }
+    th {
+      padding: 11px 14px;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafbfd; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #f0fdf4;
+      color: var(--success);
+      border: 1px solid var(--success-border);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-muted);
+    }
+    .empty-state .ei { font-size: 40px; margin-bottom: 12px; }
+
+    /* ── SETTINGS ── */
+    .settings-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .saved-msg {
+      font-size: 13px;
+      color: var(--success);
+      font-weight: 600;
+      display: none;
+    }
+
+    /* ── CODE BLOCK ── */
+    .hint-box {
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #1e3a8a;
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 580px) {
+      header { padding: 16px; }
+      header h1 { font-size: 17px; }
+      .container { padding: 16px 12px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .card { padding: 18px 16px; }
+      th, td { padding: 10px 10px; font-size: 13px; }
+      .btn-wa { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="icon">📦</div>
+  <div>
+    <h1>שליחת הודעות ציוד</h1>
+    <p>המסייעים בדרכים — כלי לאחראי ציוד</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="send">✉️ שליחה</button>
+    <button class="tab-btn" data-tab="history">📋 היסטוריה</button>
+    <button class="tab-btn" data-tab="settings">⚙️ הגדרות</button>
+  </div>
+
+  <!-- ══════════ SEND ══════════ -->
+  <div class="panel active" id="panel-send">
+
+    <div class="card">
+      <div class="card-title">👤 פרטי המתנדב</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>שם מלא <span class="req">*</span></label>
+          <input id="volunteerName" type="text" placeholder="ישראל ישראלי" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label>מספר טלפון <span class="req">*</span></label>
+          <input id="volunteerPhone" type="tel" placeholder="050-0000000" autocomplete="off" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🎒 פרטי הציוד</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>תיאור הציוד <span class="req">*</span></label>
+          <input id="equipmentDesc" type="text" placeholder="לדוגמה: אפוד זוהר × 2, ערכת עזרה ראשונה × 1" />
+        </div>
+        <div class="form-group">
+          <label>מספר הזמנה <span style="color:#94a3b8;font-weight:400;">(אופציונלי)</span></label>
+          <input id="orderNumber" type="text" placeholder="HZ-1234" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💬 תצוגה מקדימה של ההודעה</div>
+      <div class="preview-box" id="previewBox">
+        <span class="preview-placeholder">מלא את הפרטים למעלה כדי לראות את ההודעה...</span>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+        <button class="btn-copy" id="copyBtn" onclick="copyMessage()" style="display:none;">📋 העתק הודעה</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:13px;font-weight:700;color:var(--text-muted);">🙋 שולח בשם:</span>
+        <span id="coordDisplay" style="font-size:14px;font-weight:700;color:var(--text);">—</span>
+        <a href="#" onclick="switchTab('settings');return false;" style="font-size:12px;color:var(--primary);margin-right:auto;">שנה ⚙️</a>
+      </div>
+      <a id="waBtn" href="#" class="btn btn-wa" onclick="return sendWhatsApp()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        שלח בוואטסאפ
+      </a>
+      <label class="save-row">
+        <input type="checkbox" id="saveCoord" />
+        <span>שמור פרטי אחראי לפעם הבאה</span>
+      </label>
+    </div>
+
+  </div>
+
+  <!-- ══════════ HISTORY ══════════ -->
+  <div class="panel" id="panel-history">
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:18px 20px 16px;" class="history-top">
+        <span style="font-size:15px;font-weight:700;">היסטוריית שליחות</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="count-badge" id="historyCount">0 הודעות</span>
+          <button class="btn-secondary btn" onclick="clearHistory()" style="font-size:12px;padding:6px 12px;">נקה הכל</button>
+        </div>
+      </div>
+      <div style="padding:0 20px 20px;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>מתנדב</th>
+                <th>טלפון</th>
+                <th>ציוד</th>
+                <th>הזמנה</th>
+                <th>תאריך</th>
+                <th>סטטוס</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ SETTINGS ══════════ -->
+  <div class="panel" id="panel-settings">
+    <div class="card">
+      <div class="card-title">🙋 פרטי אחראי הציוד</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:18px;">הפרטים האלו יופיעו בכל הודעה שתשלח.</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>שם מלא</label>
+          <input id="s_name" type="text" placeholder="שמך המלא" />
+        </div>
+        <div class="form-group">
+          <label>טלפון</label>
+          <input id="s_phone" type="tel" placeholder="050-0000000" />
+        </div>
+        <div class="form-group full">
+          <label>שם הסניף</label>
+          <input id="s_branch" type="text" placeholder="לדוגמה: סניף צפון" />
+        </div>
+      </div>
+      <div class="settings-actions">
+        <button class="btn btn-secondary" onclick="saveSettings()">💾 שמור</button>
+        <span class="saved-msg" id="savedMsg">✅ נשמר בהצלחה!</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💬 תבנית ההודעה</div>
+      <div class="preview-box" style="background:#f8fafc;border-color:var(--border);color:var(--text-muted);font-size:13px;">שלום [שם מתנדב]! 👋
+
+הציוד שהזמנת הגיע ומחכה לך 📦
+
+🎒 ציוד: [תיאור ציוד]
+📋 מספר הזמנה: [מספר] ← מוצג רק אם הוזן
+
+לתיאום איסוף פנה אל:
+👤 [שם האחראי]
+📞 [טלפון האחראי]
+🏢 [שם הסניף] ← מוצג רק אם הוזן
+
+המסייעים בדרכים 🚗</div>
+      <div class="hint-box">
+        💡 התבנית מולאת אוטומטית בכל שליחה. פרטים שלא הוזנו לא יופיעו בהודעה.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── STATE ──
+  let coordSettings = JSON.parse(localStorage.getItem('coord_settings') || '{}');
+  let history = JSON.parse(localStorage.getItem('send_history') || '[]');
+
+  // ── TABS ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  function switchTab(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+    if (name === 'history') renderHistory();
+  }
+
+  // ── BUILD MESSAGE ──
+  function buildMessage() {
+    const name     = document.getElementById('volunteerName').value.trim();
+    const equip    = document.getElementById('equipmentDesc').value.trim();
+    const order    = document.getElementById('orderNumber').value.trim();
+    const cName    = document.getElementById('s_name').value.trim() || coordSettings.name || '';
+    const cPhone   = document.getElementById('s_phone').value.trim() || coordSettings.phone || '';
+    const cBranch  = document.getElementById('s_branch').value.trim() || coordSettings.branch || '';
+
+    if (!name || !equip) return null;
+
+    let msg = `שלום ${name}! 👋\n\nהציוד שהזמנת הגיע ומחכה לך 📦\n\n🎒 ציוד: ${equip}`;
+    if (order) msg += `\n📋 מספר הזמנה: ${order}`;
+    msg += `\n\nלתיאום איסוף פנה אל:`;
+    if (cName)   msg += `\n👤 ${cName}`;
+    if (cPhone)  msg += `\n📞 ${cPhone}`;
+    if (cBranch) msg += `\n🏢 ${cBranch}`;
+    msg += `\n\nהמסייעים בדרכים 🚗`;
+    return msg;
+  }
+
+  // ── LIVE PREVIEW ──
+  function updatePreview() {
+    const msg = buildMessage();
+    const box = document.getElementById('previewBox');
+    const copyBtn = document.getElementById('copyBtn');
+    if (msg) {
+      box.textContent = msg;
+      box.querySelector?.('.preview-placeholder')?.remove();
+      copyBtn.style.display = 'inline-flex';
+    } else {
+      box.innerHTML = '<span class="preview-placeholder">מלא את הפרטים למעלה כדי לראות את ההודעה...</span>';
+      copyBtn.style.display = 'none';
+    }
+  }
+
+  ['volunteerName','equipmentDesc','orderNumber','s_name','s_phone','s_branch'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updatePreview);
+  });
+
+  // ── FORMAT PHONE FOR wa.me ──
+  function formatPhone(raw) {
+    let p = raw.replace(/[\s\-().+]/g, '');
+    if (p.startsWith('972')) return p;
+    if (p.startsWith('0')) return '972' + p.slice(1);
+    return '972' + p;
+  }
+
+  // ── SEND WHATSAPP ──
+  function sendWhatsApp() {
+    const phone = document.getElementById('volunteerPhone').value.trim();
+    const msg   = buildMessage();
+
+    // Validate
+    let valid = true;
+    ['volunteerName','volunteerPhone','equipmentDesc'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim()) { el.classList.add('invalid'); valid = false; }
+      else el.classList.remove('invalid');
+    });
+    if (!valid) return false;
+
+    if (document.getElementById('saveCoord').checked) saveSettingsFromForm();
+
+    const formatted = formatPhone(phone);
+    const url = `https://wa.me/${formatted}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+
+    // Save to history
+    addToHistory({
+      volunteerName: document.getElementById('volunteerName').value.trim(),
+      volunteerPhone: phone,
+      equipmentDesc: document.getElementById('equipmentDesc').value.trim(),
+      orderNumber: document.getElementById('orderNumber').value.trim(),
+      sentAt: new Date().toISOString(),
+    });
+
+    return false;
+  }
+
+  // ── COPY MESSAGE ──
+  function copyMessage() {
+    const msg = buildMessage();
+    if (!msg) return;
+    navigator.clipboard.writeText(msg).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✅ הועתק!';
+      setTimeout(() => btn.textContent = '📋 העתק הודעה', 2000);
+    });
+  }
+
+  // ── HISTORY ──
+  function addToHistory(entry) {
+    history.unshift(entry);
+    if (history.length > 200) history = history.slice(0, 200);
+    localStorage.setItem('send_history', JSON.stringify(history));
+  }
+
+  function renderHistory() {
+    const tbody = document.getElementById('historyBody');
+    document.getElementById('historyCount').textContent = `${history.length} הודעות`;
+
+    if (history.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="ei">📭</div><p>עדיין לא נשלחו הודעות</p></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = history.map((r, i) => {
+      const d = new Date(r.sentAt);
+      const date = d.toLocaleString('he-IL', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+      return `
+        <tr>
+          <td><strong>${esc(r.volunteerName)}</strong></td>
+          <td style="color:var(--text-muted);">${esc(r.volunteerPhone)}</td>
+          <td>${esc(r.equipmentDesc)}</td>
+          <td style="color:var(--text-muted);">${r.orderNumber ? esc(r.orderNumber) : '—'}</td>
+          <td style="color:var(--text-muted);white-space:nowrap;font-size:13px;">${date}</td>
+          <td><span class="badge">נשלח</span></td>
+          <td><button class="btn-danger" onclick="deleteEntry(${i})" title="מחק">×</button></td>
+        </tr>`;
+    }).join('');
+  }
+
+  function deleteEntry(i) {
+    history.splice(i, 1);
+    localStorage.setItem('send_history', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function clearHistory() {
+    if (history.length === 0) return;
+    if (!confirm('למחוק את כל ההיסטוריה?')) return;
+    history = [];
+    localStorage.setItem('send_history', JSON.stringify(history));
+    renderHistory();
+  }
+
+  // ── SETTINGS ──
+  function loadSettingsIntoForm() {
+    document.getElementById('s_name').value   = coordSettings.name   || '';
+    document.getElementById('s_phone').value  = coordSettings.phone  || '';
+    document.getElementById('s_branch').value = coordSettings.branch || '';
+    updateCoordDisplay();
+    updatePreview();
+  }
+
+  function saveSettingsFromForm() {
+    coordSettings = {
+      name:   document.getElementById('s_name').value.trim(),
+      phone:  document.getElementById('s_phone').value.trim(),
+      branch: document.getElementById('s_branch').value.trim(),
+    };
+    localStorage.setItem('coord_settings', JSON.stringify(coordSettings));
+    updateCoordDisplay();
+  }
+
+  function saveSettings() {
+    saveSettingsFromForm();
+    const msg = document.getElementById('savedMsg');
+    msg.style.display = 'inline';
+    setTimeout(() => msg.style.display = 'none', 2500);
+  }
+
+  function updateCoordDisplay() {
+    const n = coordSettings.name || document.getElementById('s_name')?.value.trim();
+    document.getElementById('coordDisplay').textContent = n || '(לא הוגדר — עבור להגדרות)';
+  }
+
+  // ── UTILS ──
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Remove invalid class on input
+  document.querySelectorAll('input').forEach(el => {
+    el.addEventListener('input', () => el.classList.remove('invalid'));
+  });
+
+  // ── INIT ──
+  loadSettingsIntoForm();
+</script>
+</body>
+</html>
